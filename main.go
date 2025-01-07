@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/immanuel-254/myauth/cmd"
 	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pressly/goose/v3"
@@ -36,4 +37,6 @@ func main() {
 	}
 
 	log.Println("Migrations applied successfully!")
+
+	cmd.Api()
 }
