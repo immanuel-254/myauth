@@ -8,10 +8,26 @@ import (
 	"github.com/immanuel-254/myauth/internal"
 )
 
+var (
+	Login = internal.View{
+		Route:   "/login",
+		Handler: http.HandlerFunc(internal.Login),
+		Methods: []string{"POST"},
+	}
+
+	Logout = internal.View{
+		Route:   "/logout",
+		Handler: http.HandlerFunc(internal.Logout),
+		Methods: []string{"POST"},
+	}
+)
+
 func Api() {
 	mux := http.NewServeMux()
 
-	allviews := []internal.View{}
+	allviews := []internal.View{
+		Login,
+	}
 
 	internal.Routes(mux, allviews)
 

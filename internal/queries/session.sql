@@ -4,11 +4,16 @@ INSERT INTO sessions (
     user_id, 
     created_at
     ) 
-    VALUES (?, ?, ?);
+    VALUES (?, ?, ?)
+    RETURNING id, key, user_id, created_at;
+
+-- name: SessionRead :one
+SELECT id, key, user_id ,created_at FROM sessions
+WHERE key = ?;
 
 -- name: SessionList :many
 SELECT id, key, user_id, created_at FROM sessions
 ORDER BY id ASC;
 
 -- name: SessionDelete :exec
-DELETE FROM sessions WHERE id = ?;
+DELETE FROM sessions WHERE key = ?;

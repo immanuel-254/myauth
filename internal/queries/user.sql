@@ -1,11 +1,13 @@
 -- name: UserCreate :one
 INSERT INTO users (
     email, 
-    password, 
-    created_at, 
-    updated_at
+    password,
+    isactive, 
+    isstaff,
+    isadmin,
+    created_at
     ) 
-    VALUES (?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?)
     RETURNING id, email, created_at, updated_at;
 
 -- name: UserList :many
@@ -17,7 +19,7 @@ SELECT id, email, created_at, updated_at FROM users
 WHERE id = ?;
 
 -- name: UserLoginRead :one
-SELECT email, password FROM users
+SELECT id, email, password FROM users
 WHERE email = ?;
 
 -- name: UserUpdatePassword :one
