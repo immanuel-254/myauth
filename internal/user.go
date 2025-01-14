@@ -49,6 +49,8 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Logging(queries, ctx, "user", "create", user.ID, 0, w, r)
+
 	// send email
 	one_time, err := GenerateOneTimeToken(32, uint(user.ID))
 
@@ -81,7 +83,7 @@ func ActivateEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	// activate user
-	_, err = queries.UserUpdateIsActive(ctx, models.UserUpdateIsActiveParams{
+	user, err := queries.UserUpdateIsActive(ctx, models.UserUpdateIsActiveParams{
 		ID:        int64(user_id),
 		Isactive:  sql.NullBool{Bool: true, Valid: true},
 		UpdatedAt: sql.NullTime{Time: time.Now(), Valid: true},
@@ -91,6 +93,8 @@ func ActivateEmail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	Logging(queries, ctx, "user", "update", user.ID, int64(user_id), w, r)
 
 	resp := map[string]interface{}{"message": "email has been verified"}
 	SendData(resp, w, r)
@@ -156,7 +160,7 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	var data map[string]string
 	GetData(data, w, r)
 
-	_, err = queries.UserUpdateEmail(ctx, models.UserUpdateEmailParams{
+	user, err := queries.UserUpdateEmail(ctx, models.UserUpdateEmailParams{
 		ID:        int64(user_id),
 		Email:     data["email"],
 		UpdatedAt: sql.NullTime{Time: time.Now(), Valid: true},
@@ -166,6 +170,8 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	Logging(queries, ctx, "user", "update", user.ID, int64(user_id), w, r)
 
 	SendData(map[string]interface{}{"message": "email updated successfully"}, w, r)
 }
@@ -239,7 +245,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = queries.UserUpdatePassword(ctx, models.UserUpdatePasswordParams{
+	user, err := queries.UserUpdatePassword(ctx, models.UserUpdatePasswordParams{
 		ID:        int64(user_id),
 		Password:  hash,
 		UpdatedAt: sql.NullTime{Time: time.Now(), Valid: true},
@@ -249,6 +255,8 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	Logging(queries, ctx, "user", "update", user.ID, int64(user_id), w, r)
 
 	SendData(map[string]interface{}{"message": "password updated successfully"}, w, r)
 }
@@ -314,7 +322,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = queries.UserUpdatePassword(ctx, models.UserUpdatePasswordParams{
+	user, err := queries.UserUpdatePassword(ctx, models.UserUpdatePasswordParams{
 		ID:        int64(user_id),
 		Password:  hash,
 		UpdatedAt: sql.NullTime{Time: time.Now(), Valid: true},
@@ -324,6 +332,8 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	Logging(queries, ctx, "user", "update", user.ID, int64(user_id), w, r)
 
 	SendData(map[string]interface{}{"message": "password updated successfully"}, w, r)
 }
@@ -380,6 +390,8 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Logging(queries, ctx, "user", "delete", 0, int64(user_id), w, r)
+
 	SendData(map[string]interface{}{"message": "user account deleted"}, w, r)
 }
 
@@ -408,7 +420,7 @@ func IsActiveChange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = queries.UserUpdateIsActive(ctx, models.UserUpdateIsActiveParams{
+	user, err := queries.UserUpdateIsActive(ctx, models.UserUpdateIsActiveParams{
 		ID:        user_id,
 		Isactive:  sql.NullBool{Bool: status, Valid: true},
 		UpdatedAt: sql.NullTime{Time: time.Now(), Valid: true},
@@ -418,6 +430,8 @@ func IsActiveChange(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	Logging(queries, ctx, "user", "update", user.ID, int64(user_id), w, r)
 
 	SendData(map[string]interface{}{"message": "user active status updated successfully"}, w, r)
 }
@@ -446,7 +460,7 @@ func IsStaffChange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = queries.UserUpdateIsStaff(ctx, models.UserUpdateIsStaffParams{
+	user, err := queries.UserUpdateIsStaff(ctx, models.UserUpdateIsStaffParams{
 		ID:        user_id,
 		Isstaff:   sql.NullBool{Bool: status, Valid: true},
 		UpdatedAt: sql.NullTime{Time: time.Now(), Valid: true},
@@ -456,6 +470,8 @@ func IsStaffChange(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	Logging(queries, ctx, "user", "update", user.ID, int64(user_id), w, r)
 
 	SendData(map[string]interface{}{"message": "user staff status updated successfully"}, w, r)
 }

@@ -1,11 +1,15 @@
 package internal
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/immanuel-254/myauth/internal/models"
 	"github.com/resend/resend-go/v2"
 )
 
@@ -42,6 +46,21 @@ func SendEmail(email, subject, link string, template func(route string) string, 
 	}
 
 	_, err := client.Emails.Send(params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func Logging(queries *models.Queries, ctx context.Context, dbtable, action string, objectId, userId int64, w http.ResponseWriter, r *http.Request) {
+	err := queries.LogCreate(ctx, models.LogCreateParams{
+		DbTable:   dbtable,
+		Action:    action,
+		ObjectID:  objectId,
+		UserID:    userId,
+		CreatedAt: sql.NullTime{Time: time.Now()},
+	})
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

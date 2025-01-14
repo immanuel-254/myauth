@@ -40,16 +40,27 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	// create session
 
-	err = queries.SessionCreate(ctx, models.SessionCreateParams{
+	session, err := queries.SessionCreate(ctx, models.SessionCreateParams{
 		Key:       key,
 		UserID:    user.ID,
 		CreatedAt: sql.NullTime{Time: time.Now(), Valid: true},
 	})
 
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = queries.LogCreate(ctx, models.LogCreateParams{
+		DbTable:   "session",
+		Action:    "create",
+		ObjectID:  session.ID,
+		UserID:    session.UserID,
+		CreatedAt: sql.NullTime{Time: time.Now()},
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -65,9 +76,24 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	err := queries.SessionDelete(ctx, w.Header().Get("auth"))
 
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	auth := ctx.Value("current_user")
+
+	authUser := auth.(models.User)
+
+	err = queries.LogCreate(ctx, models.LogCreateParams{
+		DbTable:   "session",
+		Action:    "delete",
+		ObjectID:  0,
+		UserID:    authUser.ID,
+		CreatedAt: sql.NullTime{Time: time.Now()},
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

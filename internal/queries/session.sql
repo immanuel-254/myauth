@@ -1,4 +1,4 @@
--- name: SessionCreate :exec
+-- name: SessionCreate :one
 INSERT INTO sessions (
     key,
     user_id, 
