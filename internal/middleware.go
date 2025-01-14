@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/immanuel-254/myauth/internal/models"
 )
@@ -205,6 +206,11 @@ func RequireAuth(next http.Handler) http.Handler {
 			return
 		}
 
+		if session.CreatedAt.Time.AddDate(0, 0, 30).Unix() < time.Now().Unix() {
+			http.Error(w, "session has expired", http.StatusBadRequest)
+			return
+		}
+
 		user, err := queries.AuthUserRead(ctx, session.UserID)
 
 		if err != nil {
@@ -237,6 +243,11 @@ func RequireStaff(next http.Handler) http.Handler {
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if session.CreatedAt.Time.AddDate(0, 0, 30).Unix() < time.Now().Unix() {
+			http.Error(w, "session has expired", http.StatusBadRequest)
 			return
 		}
 
@@ -277,6 +288,11 @@ func RequireAdmin(next http.Handler) http.Handler {
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if session.CreatedAt.Time.AddDate(0, 0, 30).Unix() < time.Now().Unix() {
+			http.Error(w, "session has expired", http.StatusBadRequest)
 			return
 		}
 
