@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -17,12 +16,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	// get data
 	var data map[string]string
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(err)
-		return
-	}
+	GetData(data, w, r)
 
 	// get user
 	user, err := queries.UserLoginRead(ctx, data["email"])
@@ -59,16 +53,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := map[string]string{"auth": key}
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	if _, err := w.Write(jsonResp); err != nil {
-		log.Printf("Failed to write response: %v", err)
-	}
+	resp := map[string]interface{}{"auth": key}
+	SendData(resp, w, r)
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
@@ -85,14 +71,6 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := map[string]string{"message": "user deleted"}
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	if _, err := w.Write(jsonResp); err != nil {
-		log.Printf("Failed to write response: %v", err)
-	}
+	resp := map[string]interface{}{"message": "user deleted"}
+	SendData(resp, w, r)
 }

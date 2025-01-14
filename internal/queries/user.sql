@@ -18,6 +18,10 @@ ORDER BY id ASC;
 SELECT id, email, created_at, updated_at FROM users
 WHERE id = ?;
 
+-- name: AuthUserRead :one
+SELECT id, email, isactive, isadmin, isstaff, created_at, updated_at FROM users
+WHERE id = ?;
+
 -- name: UserLoginRead :one
 SELECT id, email, password FROM users
 WHERE email = ?;

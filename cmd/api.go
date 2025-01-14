@@ -20,6 +20,88 @@ var (
 		Handler: http.HandlerFunc(internal.Logout),
 		Methods: []string{"POST"},
 	}
+
+	Signup = internal.View{
+		Route:   "/signup",
+		Handler: http.HandlerFunc(internal.Signup),
+		Methods: []string{"POST"},
+	}
+
+	ActivateEmail = internal.View{
+		Route:   "/activate",
+		Handler: http.HandlerFunc(internal.ActivateEmail),
+		Methods: []string{"PUT"},
+	}
+
+	ChangeEmailRequest = internal.View{
+		Route:       "/change-email-request",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
+		Handler:     http.HandlerFunc(internal.ChangeEmailRequest),
+		Methods:     []string{"POST"},
+	}
+
+	ChangeEmail = internal.View{
+		Route:       "/change-email",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
+		Handler:     http.HandlerFunc(internal.ChangeEmail),
+		Methods:     []string{"PUT"},
+	}
+
+	ChangePasswordRequest = internal.View{
+		Route:       "/change-password-request",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
+		Handler:     http.HandlerFunc(internal.ChangePasswordRequest),
+		Methods:     []string{"POST"},
+	}
+
+	ChangePassword = internal.View{
+		Route:       "/change-password",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
+		Handler:     http.HandlerFunc(internal.ChangePassword),
+		Methods:     []string{"PUT"},
+	}
+
+	ResetPasswordRequest = internal.View{
+		Route:       "/reset-password-request",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
+		Handler:     http.HandlerFunc(internal.ResetPasswordRequest),
+		Methods:     []string{"POST"},
+	}
+
+	ResetPassword = internal.View{
+		Route:       "/reset-password",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
+		Handler:     http.HandlerFunc(internal.ResetPassword),
+		Methods:     []string{"PUT"},
+	}
+
+	DeleteUserRequest = internal.View{
+		Route:       "/delete-user-request",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
+		Handler:     http.HandlerFunc(internal.DeleteUserRequest),
+		Methods:     []string{"POST"},
+	}
+
+	DeleteUser = internal.View{
+		Route:       "/delete-user",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
+		Handler:     http.HandlerFunc(internal.DeleteUser),
+		Methods:     []string{"DELETE"},
+	}
+
+	IsActiveChange = internal.View{
+		Route:       "/isactive",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAdmin},
+		Handler:     http.HandlerFunc(internal.IsActiveChange),
+		Methods:     []string{"PUT"},
+	}
+
+	IsStaffChange = internal.View{
+		Route:       "/isstaff",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAdmin},
+		Handler:     http.HandlerFunc(internal.IsStaffChange),
+		Methods:     []string{"PUT"},
+	}
 )
 
 func Api() {
@@ -27,6 +109,17 @@ func Api() {
 
 	allviews := []internal.View{
 		Login,
+		Logout,
+		Signup,
+		ActivateEmail,
+		ChangeEmailRequest,
+		ChangeEmail,
+		ResetPasswordRequest,
+		ResetPassword,
+		DeleteUserRequest,
+		DeleteUser,
+		IsActiveChange,
+		IsStaffChange,
 	}
 
 	internal.Routes(mux, allviews)

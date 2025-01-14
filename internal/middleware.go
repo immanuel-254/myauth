@@ -1,9 +1,12 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/immanuel-254/myauth/internal/models"
 )
 
 // Config defines the configuration for the middleware.
@@ -177,6 +180,125 @@ func Cors(next http.Handler) http.Handler {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+type currentUser string
+
+const current_user currentUser = "current_user"
+
+func RequireAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		queries := models.New(DB)
+		ctx := context.Background()
+
+		if w.Header().Get("auth") == "" {
+			http.Error(w, "missing auth token", http.StatusForbidden)
+			return
+		}
+
+		session, err := queries.SessionRead(ctx, w.Header().Get("auth"))
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		user, err := queries.AuthUserRead(ctx, session.UserID)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if !user.Isactive.Bool {
+			http.Error(w, "inactive user", http.StatusForbidden)
+			return
+		}
+
+		_ = context.WithValue(ctx, current_user, user)
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func RequireStaff(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		queries := models.New(DB)
+		ctx := context.Background()
+
+		if w.Header().Get("auth") == "" {
+			http.Error(w, "missing auth token", http.StatusForbidden)
+			return
+		}
+
+		session, err := queries.SessionRead(ctx, w.Header().Get("auth"))
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		user, err := queries.AuthUserRead(ctx, session.UserID)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if !user.Isactive.Bool {
+			http.Error(w, "invalid user", http.StatusForbidden)
+			return
+		}
+
+		if !user.Isstaff.Bool {
+			http.Error(w, "invalid user", http.StatusForbidden)
+			return
+		}
+
+		_ = context.WithValue(ctx, current_user, user)
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func RequireAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		queries := models.New(DB)
+		ctx := context.Background()
+
+		if w.Header().Get("auth") == "" {
+			http.Error(w, "missing auth token", http.StatusForbidden)
+			return
+		}
+
+		session, err := queries.SessionRead(ctx, w.Header().Get("auth"))
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		user, err := queries.AuthUserRead(ctx, session.UserID)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if !user.Isactive.Bool {
+			http.Error(w, "invalid user", http.StatusForbidden)
+			return
+		}
+
+		if !user.Isadmin.Bool {
+			http.Error(w, "invalid user", http.StatusForbidden)
+			return
+		}
+
+		_ = context.WithValue(ctx, current_user, user)
+
 		next.ServeHTTP(w, r)
 	})
 }
