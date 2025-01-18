@@ -100,6 +100,55 @@ func ActivateEmail(w http.ResponseWriter, r *http.Request) {
 	SendData(resp, w, r)
 }
 
+func UserRead(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
+
+	user_id, err := strconv.ParseInt(queryParams.Get("user"), 10, 64)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	queries := models.New(DB)
+	ctx := context.Background()
+
+	auth := ctx.Value("current_user")
+
+	authUser := auth.(models.User)
+
+	user, err := queries.UserRead(ctx, user_id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	Logging(queries, ctx, "user", "read", user.ID, authUser.ID, w, r)
+
+	SendData(map[string]interface{}{"user": user}, w, r)
+}
+
+func UserList(w http.ResponseWriter, r *http.Request) {
+	queries := models.New(DB)
+	ctx := context.Background()
+
+	auth := ctx.Value("current_user")
+
+	authUser := auth.(models.User)
+
+	users, err := queries.UserList(ctx)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	Logging(queries, ctx, "user", "list", 0, authUser.ID, w, r)
+
+	SendData(map[string]interface{}{"users": users}, w, r)
+}
+
 // Require auth
 func ChangeEmailRequest(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
@@ -399,7 +448,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 func IsActiveChange(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 
-	user_id, err := strconv.ParseInt(queryParams.Get("token"), 10, 64)
+	user_id, err := strconv.ParseInt(queryParams.Get("user"), 10, 64)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -408,6 +457,10 @@ func IsActiveChange(w http.ResponseWriter, r *http.Request) {
 
 	queries := models.New(DB)
 	ctx := context.Background()
+
+	auth := ctx.Value("current_user")
+
+	authUser := auth.(models.User)
 
 	// get data
 	var data map[string]string
@@ -431,7 +484,7 @@ func IsActiveChange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Logging(queries, ctx, "user", "update", user.ID, int64(user_id), w, r)
+	Logging(queries, ctx, "user", "update", user.ID, authUser.ID, w, r)
 
 	SendData(map[string]interface{}{"message": "user active status updated successfully"}, w, r)
 }
@@ -439,7 +492,7 @@ func IsActiveChange(w http.ResponseWriter, r *http.Request) {
 func IsStaffChange(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 
-	user_id, err := strconv.ParseInt(queryParams.Get("token"), 10, 64)
+	user_id, err := strconv.ParseInt(queryParams.Get("user"), 10, 64)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -448,6 +501,10 @@ func IsStaffChange(w http.ResponseWriter, r *http.Request) {
 
 	queries := models.New(DB)
 	ctx := context.Background()
+
+	auth := ctx.Value("current_user")
+
+	authUser := auth.(models.User)
 
 	// get data
 	var data map[string]string
@@ -471,7 +528,7 @@ func IsStaffChange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Logging(queries, ctx, "user", "update", user.ID, int64(user_id), w, r)
+	Logging(queries, ctx, "user", "update", user.ID, authUser.ID, w, r)
 
 	SendData(map[string]interface{}{"message": "user staff status updated successfully"}, w, r)
 }

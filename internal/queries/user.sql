@@ -42,9 +42,5 @@ RETURNING id, email, created_at, updated_at;
 UPDATE users SET isstaff = ?, updated_at = ? WHERE id = ? 
 RETURNING id, email, created_at, updated_at;
 
--- name: UserUpdateIsAdmin :one
-UPDATE users SET isadmin = ?, updated_at = ? WHERE id = ? 
-RETURNING id, email, created_at, updated_at;
-
 -- name: UserDelete :exec
 DELETE FROM users WHERE id = ?;

@@ -33,6 +33,20 @@ var (
 		Methods: []string{"PUT"},
 	}
 
+	UserRead = internal.View{
+		Route:       "/read",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAdmin},
+		Handler:     http.HandlerFunc(internal.UserRead),
+		Methods:     []string{"GET"},
+	}
+
+	UserList = internal.View{
+		Route:       "/list",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAdmin},
+		Handler:     http.HandlerFunc(internal.UserList),
+		Methods:     []string{"GET"},
+	}
+
 	ChangeEmailRequest = internal.View{
 		Route:       "/change-email-request",
 		Middlewares: []func(http.Handler) http.Handler{internal.RequireAuth},
@@ -102,6 +116,20 @@ var (
 		Handler:     http.HandlerFunc(internal.IsStaffChange),
 		Methods:     []string{"PUT"},
 	}
+
+	SessionList = internal.View{
+		Route:       "/session/list",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAdmin},
+		Handler:     http.HandlerFunc(internal.SessionList),
+		Methods:     []string{"GET"},
+	}
+
+	LogList = internal.View{
+		Route:       "/log/list",
+		Middlewares: []func(http.Handler) http.Handler{internal.RequireAdmin},
+		Handler:     http.HandlerFunc(internal.LogList),
+		Methods:     []string{"GET"},
+	}
 )
 
 func Api() {
@@ -112,6 +140,8 @@ func Api() {
 		Logout,
 		Signup,
 		ActivateEmail,
+		UserRead,
+		UserList,
 		ChangeEmailRequest,
 		ChangeEmail,
 		ResetPasswordRequest,
@@ -120,6 +150,10 @@ func Api() {
 		DeleteUser,
 		IsActiveChange,
 		IsStaffChange,
+
+		SessionList,
+
+		LogList,
 	}
 
 	internal.Routes(mux, allviews)

@@ -229,7 +229,7 @@ func RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
-func RequireStaff(next http.Handler) http.Handler {
+/*func RequireStaff(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		queries := models.New(DB)
 		ctx := context.Background()
@@ -272,7 +272,7 @@ func RequireStaff(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-}
+}*/
 
 func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

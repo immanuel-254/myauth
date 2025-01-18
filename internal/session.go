@@ -100,3 +100,23 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	resp := map[string]interface{}{"message": "user deleted"}
 	SendData(resp, w, r)
 }
+
+func SessionList(w http.ResponseWriter, r *http.Request) {
+	queries := models.New(DB)
+	ctx := context.Background()
+
+	auth := ctx.Value("current_user")
+
+	authUser := auth.(models.User)
+
+	sessions, err := queries.SessionList(ctx)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	Logging(queries, ctx, "session", "list", 0, authUser.ID, w, r)
+
+	SendData(map[string]interface{}{"sessions": sessions}, w, r)
+}
