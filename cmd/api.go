@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/immanuel-254/myauth/internal"
@@ -159,7 +161,7 @@ func Api() {
 	internal.Routes(mux, allviews)
 
 	server := &http.Server{
-		Addr:         ":8080",                                                  // Custom port
+		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),                    // Custom port
 		Handler:      internal.Cors(internal.New(internal.ConfigDefault)(mux)), // Attach the mux as the handler
 		ReadTimeout:  10 * time.Second,                                         // Set read timeout
 		WriteTimeout: 10 * time.Second,                                         // Set write timeout
