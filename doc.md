@@ -1,0 +1,1 @@
+tailwindcss -i ./src/input.css -o ../static/styles.css --minify

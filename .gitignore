@@ -26,3 +26,5 @@ go.work.sum
 
 models/
 *.sqlite3
+static/
+*_templ.go
