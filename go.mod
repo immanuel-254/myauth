@@ -3,6 +3,7 @@ module github.com/immanuel-254/myauth
 go 1.23.3
 
 require (
+	github.com/a-h/templ v0.3.819
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/pressly/goose/v3 v3.24.0
