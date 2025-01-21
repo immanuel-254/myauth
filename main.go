@@ -38,5 +38,16 @@ func main() {
 
 	log.Println("Migrations applied successfully!")
 
-	cmd.Api()
+	if len(os.Args) < 1 {
+		panic("There has to be exactly one argument")
+	} else {
+		if os.Args[1] == "CreateAdmin" {
+			cmd.CreateAdminUser()
+		} else if os.Args[1] == "runserver" {
+			cmd.Api()
+		} else {
+			panic("Invalid Argument")
+		}
+	}
+
 }
