@@ -132,6 +132,23 @@ var (
 		Handler:     http.HandlerFunc(internal.LogList),
 		Methods:     []string{"GET"},
 	}
+
+	Hello = internal.View{
+		Route:   "/",
+		Handler: http.HandlerFunc(internal.Hello),
+		Methods: []string{"GET"},
+	}
+
+	style = internal.View{
+		Route:   "/static/style.css",
+		Handler: http.HandlerFunc(internal.StyleCss),
+		Methods: []string{"GET"},
+	}
+	alpine = internal.View{
+		Route:   "/static/alpine.js",
+		Handler: http.HandlerFunc(internal.AlpineJs),
+		Methods: []string{"GET"},
+	}
 )
 
 func Api() {
@@ -156,6 +173,11 @@ func Api() {
 		SessionList,
 
 		LogList,
+
+		Hello,
+
+		style,
+		alpine,
 	}
 
 	internal.Routes(mux, allviews)

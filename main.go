@@ -3,8 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/immanuel-254/myauth/cmd"
 	"github.com/immanuel-254/myauth/internal"
@@ -40,6 +43,39 @@ func main() {
 	}
 
 	log.Println("Migrations applied successfully!")
+
+	// get alpine js
+	var client = &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	req, err := http.NewRequest(http.MethodGet, "https://unpkg.com/alpinejs", nil)
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create or open a file for writing
+	file, err := os.Create("static/alpine.js")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(string(body))
+	if err != nil {
+		panic(err)
+	}
 
 	if len(os.Args) < 1 {
 		panic("There has to be exactly one argument")

@@ -29,3 +29,23 @@ templ Navbar() {
         </div>
       </nav>
 }
+
+templ Base(body templ.Component) {
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Auth</title>
+      <link rel="stylesheet" href="/static/style.css">
+      <script src="/static/alpine.js" defer></script>
+  </head>
+  <body>
+      @body
+  </body>
+  </html>
+}
+
+templ HelloWorld() {
+  @Navbar()
+}
