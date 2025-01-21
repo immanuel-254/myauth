@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 )
@@ -150,9 +151,9 @@ func EmailVerificationTemplate(route string) string {
             <p>If you didn’t sign up for this account, you can safely ignore this email.</p>
         </div>
         <div class="mt-6 text-center text-xs text-gray-400">
-            <p>&copy; %v Your Company. All rights reserved.</p>
+            <p>&copy; %v %s. All rights reserved.</p>
         </div>
-    </div>`, route, time.Now().Year())})
+    </div>`, route, time.Now().Year(), os.Getenv("COMPANY_NAME"))})
 
 	return html.String([]string{BaseHeadElement("Email Verification"), bodystr})
 }
@@ -180,9 +181,9 @@ func ChangeEmailVerificationTemplate(route string) string {
             <p>If you did not request to change your email address, you can safely ignore this email.</p>
         </div>
         <div class="mt-6 text-center text-xs text-gray-400">
-            <p>&copy; %v Your Company. All rights reserved.</p>
+            <p>&copy; %v %s. All rights reserved.</p>
         </div>
-    </div>`, route, time.Now().Year())})
+    </div>`, route, time.Now().Year(), os.Getenv("COMPANY_NAME"))})
 
 	return html.String([]string{BaseHeadElement("Change Email Verification"), bodystr})
 }
@@ -210,9 +211,9 @@ func ChangePasswordVerificationTemplate(route string) string {
             <p>If you did not request to change your password, you can safely ignore this email.</p>
         </div>
         <div class="mt-6 text-center text-xs text-gray-400">
-            <p>&copy; %v Your Company. All rights reserved.</p>
+            <p>&copy; %v %s. All rights reserved.</p>
         </div>
-    </div>`, route, time.Now().Year())})
+    </div>`, route, time.Now().Year(), os.Getenv("COMPANY_NAME"))})
 
 	return html.String([]string{BaseHeadElement("Change Password Verification"), bodystr})
 }
@@ -240,9 +241,9 @@ func ResetPasswordVerificationTemplate(route string) string {
             <p>If you did not request to reset your password, you can safely ignore this email.</p>
         </div>
         <div class="mt-6 text-center text-xs text-gray-400">
-            <p>&copy; %v Your Company. All rights reserved.</p>
+            <p>&copy; %v %s. All rights reserved.</p>
         </div>
-    </div>`, route, time.Now().Year())})
+    </div>`, route, time.Now().Year(), os.Getenv("COMPANY_NAME"))})
 
 	return html.String([]string{BaseHeadElement("Reset Password Verification"), bodystr})
 }
@@ -270,9 +271,9 @@ func DeleteUserVerificationTemplate(route string) string {
             <p>If you did not request to delete user account, you can safely ignore this email.</p>
         </div>
         <div class="mt-6 text-center text-xs text-gray-400">
-            <p>&copy; %v Your Company. All rights reserved.</p>
+            <p>&copy; %v %s. All rights reserved.</p>
         </div>
-    </div>`, route, time.Now().Year())})
+    </div>`, route, time.Now().Year(), os.Getenv("COMPANY_NAME"))})
 
 	return html.String([]string{BaseHeadElement("Reset Password Verification"), bodystr})
 }
