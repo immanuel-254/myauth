@@ -133,9 +133,9 @@ var (
 		Methods:     []string{"GET"},
 	}
 
-	Hello = internal.View{
+	DashBoard = internal.View{
 		Route:   "/",
-		Handler: http.HandlerFunc(internal.Hello),
+		Handler: http.HandlerFunc(internal.Dashboard),
 		Methods: []string{"GET"},
 	}
 
@@ -174,7 +174,7 @@ func Api() {
 
 		LogList,
 
-		Hello,
+		DashBoard,
 
 		style,
 		alpine,

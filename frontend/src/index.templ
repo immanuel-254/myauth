@@ -49,3 +49,73 @@ templ Base(body templ.Component) {
 templ HelloWorld() {
   @Navbar()
 }
+
+templ DashBoard() {
+  @Navbar()
+  <div class="bg-muted min-h-screen py-1">
+  <div class="container mx-auto px-4">
+    <div class="space-y-6 p-6">
+      <div class="bg-background rounded-lg border border-black p-4 text-center font-bold">User Statistics</div>
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <!---->
+        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
+          <h3 class="mb-4 text-center text-2xl font-semibold">Daily Login</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="text-center text-xl">15</div>
+            <div class="text-center text-xl">17</div>
+          </div>
+        </div>
+
+        <!---->
+        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
+          <h3 class="mb-4 text-center text-2xl font-semibold">Weekly Login</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="text-center text-xl">15</div>
+            <div class="text-center text-xl">17</div>
+          </div>
+        </div>
+
+        <!---->
+        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
+          <h3 class="mb-4 text-center text-2xl font-semibold">Monthly Login</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="text-center text-xl">15</div>
+            <div class="text-center text-xl">17</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-black p-6">
+        <h3 class="mb-6 text-center text-xl font-semibold">New Users This Year</h3>
+        <div class="h-[300px] w-full"></div>
+      </div>
+
+      <div class="bg-background rounded-lg border border-black p-4 text-center font-bold">Activity</div>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
+          <h3 class="mb-4 text-center text-2xl font-semibold">Daily</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="text-center text-xl">15</div>
+            <div class="text-center text-xl">17</div>
+          </div>
+        </div>
+        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
+          <h3 class="mb-4 text-center text-2xl font-semibold">Weekly</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="text-center text-xl">15</div>
+            <div class="text-center text-xl">17</div>
+          </div>
+        </div>
+        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
+          <h3 class="mb-4 text-center text-2xl font-semibold">Monthly</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="text-center text-xl">15</div>
+            <div class="text-center text-xl">17</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}

@@ -7,8 +7,8 @@ import (
 	"github.com/immanuel-254/myauth/frontend/src"
 )
 
-func Hello(w http.ResponseWriter, r *http.Request) {
-	component := src.Base(src.HelloWorld())
+func Dashboard(w http.ResponseWriter, r *http.Request) {
+	component := src.Base(src.DashBoard())
 
 	component.Render(context.Background(), w)
 }
