@@ -1,33 +1,38 @@
 package src
 
 templ Navbar() {
-    <nav class="grid grid-cols-2 gap-1 border border-b-black">
-        <div class="flex flex-row justify-items-start p-2">
-          <a class="mx-1 text-xl" href="/">DashBoard</a>
-        </div>
-      
-        <div class="flex flex-row-reverse justify-items-end p-2">
-          <div class="relative inline-block" x-data="{ open: false }">
-            <button type="button" class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-black shadow-sm ring-1 ring-inset ring-black hover:bg-gray-50" id="menu-button" @click="open = !open" :aria-expanded="open.toString()" aria-haspopup="true">
-              Settings
-              <svg class="-mr-1 size-5 text-black" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-              </svg>
-            </button>
-            <div x-show="open" @click.away="open = false" class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-              <div class="py-1" role="none">
-                <!-- Active: "bg-gray-100 text-gray-900 outline-none", Not Active: "text-gray-700" -->
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-0">Change Email</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-1">Change Password</a>
-      
-                <form method="POST" action="#" role="none">
-                  <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-3">Sign out</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <header class="p-3 mb-3 border-bottom" style="background-color: #E8E8E8;">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+      <!-- Home Link -->
+      <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none fs-1 fw-bold">
+        Home
+      </a>
+
+      <!-- Centered Navigation Links 
+      <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0 mx-auto">
+        <li><a href="#" class="nav-link px-2 link-body-emphasis">Users</a></li>
+        <li><a href="#" class="nav-link px-2 link-body-emphasis">Logs</a></li>
+      </ul>-->
+
+      <!-- Dropdown Menu -->
+      <div class="dropdown text-end">
+        <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle fs-3" data-bs-toggle="dropdown" aria-expanded="false">
+          Settings
+        </a>
+        <ul class="dropdown-menu text-small">
+          <li><a class="dropdown-item" href="#">Users</a></li>
+          <li><a class="dropdown-item" href="#">Logs</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#">Change Email</a></li>
+          <li><a class="dropdown-item" href="#">Change Password</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#">Sign out</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
 }
 
 templ Base(body templ.Component) {
@@ -37,8 +42,8 @@ templ Base(body templ.Component) {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Auth</title>
-      <link rel="stylesheet" href="/static/style.css">
-      <script src="/static/alpine.js" defer></script>
+      <link rel="stylesheet" href="/static/styles.css">
+      <script src="/static/script.js" defer></script>
   </head>
   <body>
       @body
@@ -50,72 +55,26 @@ templ HelloWorld() {
   @Navbar()
 }
 
-templ DashBoard() {
+templ DashBoard(activity, login map[string]map[string]string) {
   @Navbar()
-  <div class="bg-muted min-h-screen py-1">
-  <div class="container mx-auto px-4">
-    <div class="space-y-6 p-6">
-      <div class="bg-background rounded-lg border border-black p-4 text-center font-bold">User Statistics</div>
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <!---->
-        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
-          <h3 class="mb-4 text-center text-2xl font-semibold">Daily Login</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="text-center text-xl">15</div>
-            <div class="text-center text-xl">17</div>
-          </div>
-        </div>
-
-        <!---->
-        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
-          <h3 class="mb-4 text-center text-2xl font-semibold">Weekly Login</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="text-center text-xl">15</div>
-            <div class="text-center text-xl">17</div>
-          </div>
-        </div>
-
-        <!---->
-        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
-          <h3 class="mb-4 text-center text-2xl font-semibold">Monthly Login</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="text-center text-xl">15</div>
-            <div class="text-center text-xl">17</div>
-          </div>
-        </div>
+  <div class="container text-center mb-5">
+      <p class="fs-2 text-decoration-underline">Logins</p>
+      <div class="row gap-2">
+        @stats("Daily", login["daily"]["current"], login["daily"]["change"])
+        @stats("Weekly", login["weekly"]["current"], login["weekly"]["change"])
+        @stats("Monthly", login["monthly"]["current"], login["monthly"]["change"])
       </div>
-
-      <div class="rounded-lg border border-black p-6">
-        <h3 class="mb-6 text-center text-xl font-semibold">New Users This Year</h3>
-        <div class="h-[300px] w-full"></div>
+      <hr class="my-5"/>
+      <p class="fs-2 text-decoration-underline">New Users</p>
+      <div class="row gap-2">
+        
       </div>
-
-      <div class="bg-background rounded-lg border border-black p-4 text-center font-bold">Activity</div>
-
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
-          <h3 class="mb-4 text-center text-2xl font-semibold">Daily</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="text-center text-xl">15</div>
-            <div class="text-center text-xl">17</div>
-          </div>
-        </div>
-        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
-          <h3 class="mb-4 text-center text-2xl font-semibold">Weekly</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="text-center text-xl">15</div>
-            <div class="text-center text-xl">17</div>
-          </div>
-        </div>
-        <div class="rounded-lg border border-black p-6 transition-all hover:shadow-md">
-          <h3 class="mb-4 text-center text-2xl font-semibold">Monthly</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="text-center text-xl">15</div>
-            <div class="text-center text-xl">17</div>
-          </div>
-        </div>
+      <hr class="my-5"/>
+      <p class="fs-2 text-decoration-underline">Activity</p>
+      <div class="row gap-2">
+        @stats("Daily", activity["daily"]["current"], activity["daily"]["change"])
+        @stats("Weekly", activity["weekly"]["current"], activity["weekly"]["change"])
+        @stats("Monthly", activity["monthly"]["current"], activity["monthly"]["change"])
       </div>
-    </div>
   </div>
-</div>
 }

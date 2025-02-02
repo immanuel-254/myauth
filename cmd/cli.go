@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"syscall"
+	"time"
 
 	"github.com/immanuel-254/myauth/internal"
 	"github.com/immanuel-254/myauth/internal/models"
@@ -42,13 +43,26 @@ func CreateAdminUser() {
 	queries := models.New(internal.DB)
 	ctx := context.Background()
 
-	_, err = queries.UserCreate(ctx, models.UserCreateParams{
-		Email:    email,
-		Password: hash,
-		Isactive: sql.NullBool{Bool: true, Valid: true},
-		Isstaff:  sql.NullBool{Bool: true, Valid: true},
-		Isadmin:  sql.NullBool{Bool: true, Valid: true},
+	user, err := queries.UserCreate(ctx, models.UserCreateParams{
+		Email:     email,
+		Password:  hash,
+		Isactive:  sql.NullBool{Bool: true, Valid: true},
+		Isstaff:   sql.NullBool{Bool: true, Valid: true},
+		Isadmin:   sql.NullBool{Bool: true, Valid: true},
+		CreatedAt: sql.NullTime{Time: time.Now(), Valid: true},
 	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = queries.LogCreate(ctx, models.LogCreateParams{
+		DbTable:   "user",
+		Action:    "create",
+		ObjectID:  user.ID,
+		UserID:    0,
+		CreatedAt: sql.NullTime{Time: time.Now(), Valid: true},
+	})
+
 	if err != nil {
 		panic(err)
 	}

@@ -140,13 +140,13 @@ var (
 	}
 
 	style = internal.View{
-		Route:   "/static/style.css",
+		Route:   "/static/styles.css",
 		Handler: http.HandlerFunc(internal.StyleCss),
 		Methods: []string{"GET"},
 	}
-	alpine = internal.View{
-		Route:   "/static/alpine.js",
-		Handler: http.HandlerFunc(internal.AlpineJs),
+	script = internal.View{
+		Route:   "/static/script.js",
+		Handler: http.HandlerFunc(internal.ScriptJs),
 		Methods: []string{"GET"},
 	}
 )
@@ -177,7 +177,7 @@ func Api() {
 		DashBoard,
 
 		style,
-		alpine,
+		script,
 	}
 
 	internal.Routes(mux, allviews)
