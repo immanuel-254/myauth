@@ -8,7 +8,6 @@ type View struct {
 	Route       string
 	Middlewares []func(http.Handler) http.Handler
 	Handler     http.Handler
-	Methods     []string
 }
 
 // Middleware chaining
@@ -23,14 +22,9 @@ func chainMiddlewares(handler http.Handler, middlewares []func(http.Handler) htt
 func Routes(mux *http.ServeMux, views []View) {
 	for _, view := range views {
 		handlerWithMiddlewares := chainMiddlewares(view.Handler, view.Middlewares)
-		for _, method := range view.Methods {
-			mux.HandleFunc(view.Route, func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != method {
-					http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-					return
-				}
-				handlerWithMiddlewares.ServeHTTP(w, r)
-			})
-		}
+		mux.HandleFunc(view.Route, func(w http.ResponseWriter, r *http.Request) {
+			handlerWithMiddlewares.ServeHTTP(w, r)
+		})
+
 	}
 }

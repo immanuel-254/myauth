@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -192,14 +193,28 @@ const current_user currentUser = "current_user"
 func RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		queries := models.New(DB)
-		ctx := context.Background()
+		ctx := r.Context()
 
-		if w.Header().Get("auth") == "" {
+		var token string
+
+		// 1. Check for token in Authorization header
+		token = r.Header.Get("auth")
+
+		// 2. If no token in header, check for the session_token cookie
+		if token == "" {
+			cookie, err := r.Cookie("session_token")
+			if err == nil {
+				token = cookie.Value // Use token from cookie if available
+			}
+		}
+
+		// 3. If no token found in either place, return error
+		if token == "" {
 			http.Error(w, "missing auth token", http.StatusForbidden)
 			return
 		}
 
-		session, err := queries.SessionRead(ctx, w.Header().Get("auth"))
+		session, err := queries.SessionRead(ctx, token)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -223,7 +238,8 @@ func RequireAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		_ = context.WithValue(ctx, current_user, user)
+		ctx = context.WithValue(ctx, current_user, user) // Store user in context
+		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})
@@ -277,14 +293,28 @@ func RequireAuth(next http.Handler) http.Handler {
 func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		queries := models.New(DB)
-		ctx := context.Background()
+		ctx := r.Context()
 
-		if w.Header().Get("auth") == "" {
-			http.Error(w, "missing auth token", http.StatusForbidden)
+		var token string
+
+		// 1. Check for token in Authorization header
+		token = r.Header.Get("auth")
+
+		// 2. If no token in header, check for the session_token cookie
+		if token == "" {
+			cookie, err := r.Cookie("session_token")
+			if err == nil {
+				token = cookie.Value // Use token from cookie if available
+			}
+		}
+
+		// 3. If no token found in either place, return error
+		if token == "" {
+			http.Error(w, "Missing auth token", http.StatusForbidden)
 			return
 		}
 
-		session, err := queries.SessionRead(ctx, w.Header().Get("auth"))
+		session, err := queries.SessionRead(ctx, token)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -313,8 +343,94 @@ func RequireAdmin(next http.Handler) http.Handler {
 			return
 		}
 
-		_ = context.WithValue(ctx, current_user, user)
+		ctx = context.WithValue(ctx, current_user, user) // Store user in context
+		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func DashRequireAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		queries := models.New(DB)
+		ctx := r.Context()
+
+		var token string
+
+		// 1. Check for token in Authorization header
+		token = r.Header.Get("auth")
+
+		// 2. If no token in header, check for the session_token cookie
+		if token == "" {
+			cookie, err := r.Cookie("session_token")
+			if err == nil {
+				token = cookie.Value // Use token from cookie if available
+			}
+		}
+
+		// 3. If no token found in either place, return error
+		if token == "" {
+			http.Redirect(w, r, "/dash-login", http.StatusSeeOther)
+			return
+		}
+
+		session, err := queries.SessionRead(ctx, token)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if session.CreatedAt.Time.AddDate(0, 0, 30).Unix() < time.Now().Unix() {
+			http.Redirect(w, r, "/dash-login", http.StatusSeeOther)
+			return
+		}
+
+		user, err := queries.AuthUserRead(ctx, session.UserID)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if !user.Isactive.Bool {
+			http.Error(w, "invalid user", http.StatusForbidden)
+			return
+		}
+
+		if !user.Isadmin.Bool {
+			http.Error(w, "invalid user", http.StatusForbidden)
+			return
+		}
+
+		ctx = context.WithValue(ctx, current_user, user) // Store user in context
+		r = r.WithContext(ctx)
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func LoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		// Custom response writer to capture status code
+		lrw := &loggingResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		next.ServeHTTP(lrw, r)
+
+		// Log details
+		log.Printf("%s %s %d %s", r.Method, r.URL.Path, lrw.statusCode, time.Since(start))
+	})
+}
+
+// loggingResponseWriter captures the response status code
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+// Override WriteHeader to capture status code
+func (lrw *loggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
 }

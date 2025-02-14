@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/immanuel-254/myauth/frontend/src"
@@ -10,6 +11,11 @@ import (
 )
 
 func Dashboard(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queries := models.New(DB)
 	ctx := context.Background()
 
@@ -122,6 +128,112 @@ func Dashboard(w http.ResponseWriter, r *http.Request) {
 	Login["monthly"]["change"] = strconv.Itoa(len(monthlySessions) - len(previousmonthlySessions))
 
 	component := src.Base(src.DashBoard(activity, Login))
+
+	component.Render(context.Background(), w)
+}
+
+func Dashlogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		queries := models.New(DB)
+		ctx := context.Background()
+
+		data := map[string]string{
+			"email":    r.FormValue("email"),
+			"password": r.FormValue("password"),
+		}
+
+		key, code, err := AuthLogin(queries, ctx, data)
+
+		if err != nil {
+			http.Error(w, err.Error(), code)
+			return
+		}
+
+		secure, err := strconv.ParseBool(os.Getenv("HTTPS"))
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "session_token",
+			Value:    key,
+			Path:     "/",
+			HttpOnly: true,   // Prevent JavaScript access
+			Secure:   secure, // Send only over HTTPS
+			SameSite: http.SameSiteStrictMode,
+		})
+
+		if code == http.StatusOK {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		return
+	}
+
+	component := src.Base(src.Login())
+
+	component.Render(context.Background(), w)
+}
+
+func Dashlogout(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		queries := models.New(DB)
+		ctx := r.Context()
+
+		var token string
+
+		cookie, err := r.Cookie("session_token")
+		if err == nil {
+			token = cookie.Value // Use token from cookie if available
+		}
+
+		if token == "" {
+			http.Redirect(w, r, "/dash-login", http.StatusSeeOther)
+			return
+		}
+
+		session, err := queries.SessionRead(ctx, token)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// delete session
+		err = queries.SessionDelete(ctx, token)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		Logging(queries, ctx, "session", "delete", session.ID, session.UserID, w, r)
+
+		secure, err := strconv.ParseBool(os.Getenv("HTTPS"))
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "session_token",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1, // Delete immediately
+			HttpOnly: true,
+			Secure:   secure,
+			SameSite: http.SameSiteLaxMode,
+		})
+
+		http.Redirect(w, r, "/dash-login", http.StatusSeeOther)
+		return
+	}
+
+	component := src.Base(src.Logout())
 
 	component.Render(context.Background(), w)
 }

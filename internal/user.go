@@ -13,6 +13,11 @@ import (
 )
 
 func Signup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queries := models.New(DB)
 	ctx := context.Background()
 
@@ -67,6 +72,11 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func ActivateEmail(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queryParams := r.URL.Query()
 
 	token := queryParams.Get("token")
@@ -101,6 +111,11 @@ func ActivateEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserRead(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queryParams := r.URL.Query()
 
 	user_id, err := strconv.ParseInt(queryParams.Get("user"), 10, 64)
@@ -111,11 +126,16 @@ func UserRead(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queries := models.New(DB)
-	ctx := context.Background()
+	ctx := r.Context()
 
-	auth := ctx.Value("current_user")
+	auth := ctx.Value(current_user)
 
-	authUser := auth.(models.User)
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	user, err := queries.UserRead(ctx, user_id)
 
@@ -130,12 +150,23 @@ func UserRead(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserList(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queries := models.New(DB)
-	ctx := context.Background()
 
-	auth := ctx.Value("current_user")
+	ctx := r.Context()
 
-	authUser := auth.(models.User)
+	auth := ctx.Value(current_user)
+
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	users, err := queries.UserList(ctx)
 
@@ -151,15 +182,25 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 
 // Require auth
 func ChangeEmailRequest(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
 	// get data
 	var data map[string]string
 	GetData(data, w, r)
 
-	auth := ctx.Value("current_user")
+	ctx := r.Context()
 
-	authUser := auth.(models.User)
+	auth := ctx.Value(current_user)
+
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	if data["email"] != authUser.Email {
 		http.Error(w, "invalid email", http.StatusBadRequest)
@@ -181,6 +222,11 @@ func ChangeEmailRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChangeEmail(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queryParams := r.URL.Query()
 
 	token := queryParams.Get("token")
@@ -194,11 +240,16 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queries := models.New(DB)
-	ctx := context.Background()
+	ctx := r.Context()
 
-	auth := ctx.Value("current_user")
+	auth := ctx.Value(current_user)
 
-	authUser := auth.(models.User)
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	if authUser.ID != int64(user_id) {
 		http.Error(w, "Forbidden User", http.StatusForbidden)
@@ -226,11 +277,21 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChangePasswordRequest(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-	auth := ctx.Value("current_user")
+	ctx := r.Context()
 
-	authUser := auth.(models.User)
+	auth := ctx.Value(current_user)
+
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	// send email
 	one_time, err := GenerateOneTimeToken(32, uint(authUser.ID))
@@ -247,6 +308,11 @@ func ChangePasswordRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChangePassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queryParams := r.URL.Query()
 
 	token := queryParams.Get("token")
@@ -260,14 +326,26 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queries := models.New(DB)
-	ctx := context.Background()
+	ctx := r.Context()
 
-	auth := ctx.Value("current_user")
+	auth := ctx.Value(current_user)
 
-	authUser := auth.(models.User)
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	if authUser.ID != int64(user_id) {
 		http.Error(w, "Forbidden User", http.StatusForbidden)
+		return
+	}
+
+	user, err := queries.UserLoginRead(ctx, authUser.Email)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -275,7 +353,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	var data map[string]string
 	GetData(data, w, r)
 
-	check := CheckPasswordHash(data["old_password"], authUser.Password)
+	check := CheckPasswordHash(data["old_password"], user.Password)
 
 	if !check {
 		http.Error(w, "Invalid Password", http.StatusBadRequest)
@@ -294,7 +372,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := queries.UserUpdatePassword(ctx, models.UserUpdatePasswordParams{
+	_, err = queries.UserUpdatePassword(ctx, models.UserUpdatePasswordParams{
 		ID:        int64(user_id),
 		Password:  hash,
 		UpdatedAt: sql.NullTime{Time: time.Now(), Valid: true},
@@ -311,11 +389,21 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func ResetPasswordRequest(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-	auth := ctx.Value("current_user")
+	ctx := r.Context()
 
-	authUser := auth.(models.User)
+	auth := ctx.Value(current_user)
+
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	// send email
 	one_time, err := GenerateOneTimeToken(32, uint(authUser.ID))
@@ -331,6 +419,11 @@ func ResetPasswordRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func ResetPassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queryParams := r.URL.Query()
 
 	token := queryParams.Get("token")
@@ -344,14 +437,26 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queries := models.New(DB)
-	ctx := context.Background()
+	ctx := r.Context()
 
-	auth := ctx.Value("current_user")
+	auth := ctx.Value(current_user)
 
-	authUser := auth.(models.User)
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	if authUser.ID != int64(user_id) {
 		http.Error(w, "Forbidden User", http.StatusForbidden)
+		return
+	}
+
+	user, err := queries.UserLoginRead(ctx, authUser.Email)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -371,7 +476,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := queries.UserUpdatePassword(ctx, models.UserUpdatePasswordParams{
+	_, err = queries.UserUpdatePassword(ctx, models.UserUpdatePasswordParams{
 		ID:        int64(user_id),
 		Password:  hash,
 		UpdatedAt: sql.NullTime{Time: time.Now(), Valid: true},
@@ -388,11 +493,21 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUserRequest(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-	auth := ctx.Value("current_user")
+	ctx := r.Context()
 
-	authUser := auth.(models.User)
+	auth := ctx.Value(current_user)
+
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	// send email
 	one_time, err := GenerateOneTimeToken(32, uint(authUser.ID))
@@ -408,6 +523,11 @@ func DeleteUserRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queryParams := r.URL.Query()
 
 	token := queryParams.Get("token")
@@ -421,11 +541,16 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queries := models.New(DB)
-	ctx := context.Background()
+	ctx := r.Context()
 
-	auth := ctx.Value("current_user")
+	auth := ctx.Value(current_user)
 
-	authUser := auth.(models.User)
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	if authUser.ID != int64(user_id) {
 		http.Error(w, "Forbidden User", http.StatusForbidden)
@@ -446,6 +571,11 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 // require admin
 func IsActiveChange(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queryParams := r.URL.Query()
 
 	user_id, err := strconv.ParseInt(queryParams.Get("user"), 10, 64)
@@ -456,11 +586,16 @@ func IsActiveChange(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queries := models.New(DB)
-	ctx := context.Background()
+	ctx := r.Context()
 
-	auth := ctx.Value("current_user")
+	auth := ctx.Value(current_user)
 
-	authUser := auth.(models.User)
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	// get data
 	var data map[string]string
@@ -490,6 +625,11 @@ func IsActiveChange(w http.ResponseWriter, r *http.Request) {
 }
 
 func IsStaffChange(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queryParams := r.URL.Query()
 
 	user_id, err := strconv.ParseInt(queryParams.Get("user"), 10, 64)
@@ -500,11 +640,16 @@ func IsStaffChange(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queries := models.New(DB)
-	ctx := context.Background()
+	ctx := r.Context()
 
-	auth := ctx.Value("current_user")
+	auth := ctx.Value(current_user)
 
-	authUser := auth.(models.User)
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	// get data
 	var data map[string]string

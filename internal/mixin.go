@@ -58,7 +58,7 @@ func Logging(queries *models.Queries, ctx context.Context, dbtable, action strin
 		Action:    action,
 		ObjectID:  objectId,
 		UserID:    userId,
-		CreatedAt: sql.NullTime{Time: time.Now()},
+		CreatedAt: sql.NullTime{Time: time.Now(), Valid: true},
 	})
 
 	if err != nil {

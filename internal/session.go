@@ -3,7 +3,6 @@ package internal
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -11,6 +10,11 @@ import (
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queries := models.New(DB)
 	ctx := context.Background()
 
@@ -18,49 +22,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var data map[string]string
 	GetData(data, w, r)
 
-	// get user
-	user, err := queries.UserLoginRead(ctx, data["email"])
+	key, code, err := AuthLogin(queries, ctx, data)
 
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	check := CheckPasswordHash(data["password"], user.Password)
-
-	if !check {
-		http.Error(w, "Invalid Credentials", http.StatusBadRequest)
-		return
-	}
-
-	// create key
-	key := string(GenerateAESKey())
-
-	// create session
-
-	session, err := queries.SessionCreate(ctx, models.SessionCreateParams{
-		Key:       key,
-		UserID:    user.ID,
-		CreatedAt: sql.NullTime{Time: time.Now(), Valid: true},
-	})
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = queries.LogCreate(ctx, models.LogCreateParams{
-		DbTable:   "session",
-		Action:    "create",
-		ObjectID:  session.ID,
-		UserID:    session.UserID,
-		CreatedAt: sql.NullTime{Time: time.Now()},
-	})
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), code)
 		return
 	}
 
@@ -69,27 +34,35 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	queries := models.New(DB)
-	ctx := context.Background()
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-	// delete session
-	err := queries.SessionDelete(ctx, w.Header().Get("auth"))
+	queries := models.New(DB)
+	ctx := r.Context()
+
+	session, err := queries.SessionRead(ctx, w.Header().Get("auth"))
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	auth := ctx.Value("current_user")
+	// delete session
+	err = queries.SessionDelete(ctx, w.Header().Get("auth"))
 
-	authUser := auth.(models.User)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	err = queries.LogCreate(ctx, models.LogCreateParams{
 		DbTable:   "session",
 		Action:    "delete",
-		ObjectID:  0,
-		UserID:    authUser.ID,
-		CreatedAt: sql.NullTime{Time: time.Now()},
+		ObjectID:  session.ID,
+		UserID:    session.UserID,
+		CreatedAt: sql.NullTime{Time: time.Now(), Valid: true},
 	})
 
 	if err != nil {
@@ -97,17 +70,27 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := map[string]interface{}{"message": "user deleted"}
+	resp := map[string]interface{}{"message": "user logged out"}
 	SendData(resp, w, r)
 }
 
 func SessionList(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	queries := models.New(DB)
-	ctx := context.Background()
+	ctx := r.Context()
 
-	auth := ctx.Value("current_user")
+	auth := ctx.Value(current_user)
 
-	authUser := auth.(models.User)
+	if auth == nil {
+		http.Error(w, "there is no current user", http.StatusInternalServerError)
+		return
+	}
+
+	authUser := auth.(models.AuthUserReadRow)
 
 	sessions, err := queries.SessionList(ctx)
 

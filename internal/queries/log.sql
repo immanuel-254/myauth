@@ -21,11 +21,11 @@ WHERE DATE(created_at) = DATE('now');
 SELECT id, db_table, action, object_id, user_id, created_at, updated_at FROM logs
 WHERE DATE(created_at) = DATE('now', '-1 day');
 
--- name: LogWeeklyList :many
+-- name: LogPreviousWeeklyList :many
 SELECT id, db_table, action, object_id, user_id, created_at, updated_at FROM logs
 WHERE DATE(created_at) >= DATE('now', 'weekday 0') AND DATE(created_at) <= DATE('now');
 
--- name: LogPreviousWeeklyList :many
+-- name: LogWeeklyList :many
 SELECT id, db_table, action, object_id, user_id, created_at, updated_at FROM logs
 WHERE created_at >= DATE('now', 'weekday 0', '-7 days') AND created_at < DATE('now', 'weekday 0');
 

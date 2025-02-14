@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 	"syscall"
 	"time"
 
@@ -24,6 +25,7 @@ func CreateAdminUser() {
 		return
 	}
 	email = email[:len(email)-1] // Remove the trailing newline
+	email = strings.TrimSuffix(email, "\r")
 
 	fmt.Print("Password (input will be hidden): ")
 	bytePassword, err := term.ReadPassword(int(syscall.Stdin))

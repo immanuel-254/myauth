@@ -77,34 +77,6 @@ func main() {
 		panic(err)
 	}
 
-	req, err = http.NewRequest(http.MethodGet, "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js", nil)
-	if err != nil {
-		panic(err)
-	}
-
-	resp, err = client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	body, err = io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create or open a file for writing
-	file, err = os.Create("static/script.js")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(string(body))
-	if err != nil {
-		panic(err)
-	}
-
 	if len(os.Args) < 1 {
 		panic("There has to be exactly one argument")
 	} else {
